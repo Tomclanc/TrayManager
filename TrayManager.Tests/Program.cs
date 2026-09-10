@@ -8,6 +8,18 @@ internal static class Tests
     private static void Check(bool result, string name) { if (!result) throw new Exception("FAIL " + name); Console.WriteLine("PASS " + name); }
     private static void Main()
     {
+        var priority = Efficiency.GetPriorityClass(Efficiency.GetCurrentProcess());
+        try
+        {
+            Check(Efficiency.Apply(true), "enable own-process efficiency mode");
+            var power = new Efficiency.PowerState { Version = 1 };
+            Check(Efficiency.GetProcessInformation(Efficiency.GetCurrentProcess(), 4, ref power, 12) && (power.StateMask & 1) != 0, "EcoQoS readback enabled");
+            Check(Efficiency.GetPriorityClass(Efficiency.GetCurrentProcess()) == 0x40, "background idle priority");
+        }
+        finally { Efficiency.Apply(false); }
+        var normalPower = new Efficiency.PowerState { Version = 1 };
+        Check(Efficiency.GetProcessInformation(Efficiency.GetCurrentProcess(), 4, ref normalPower, 12) && (normalPower.StateMask & 1) == 0, "EcoQoS restored");
+        Check(Efficiency.GetPriorityClass(Efficiency.GetCurrentProcess()) == priority, "original priority restored");
         Check(LayoutMetrics.For(true, 1920 / 2, 1080 / 2).FontScale == 1, "1080p 200% no extra font zoom");
         Check(LayoutMetrics.For(true, 1920 / 2, 1080 / 2).Compact, "1080p 200% compact layout");
         Check(LayoutMetrics.For(true, 2880 / 2, 1800 / 2).FontScale == 1.15, "spacious 200% bounded enlargement");

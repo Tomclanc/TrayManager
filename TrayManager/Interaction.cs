@@ -71,10 +71,20 @@ internal sealed partial class MainWindow
         {
             if (args.DidPresenterChange || args.DidSizeChange) SynchronizeWindowMode();
         };
-        Activated += (_, _) => { SynchronizeWindowMode(); UpdateCaptionColors(); };
-        gamingTimer.Tick += (_, _) => SynchronizeWindowMode();
+        Activated += (_, _) => { SynchronizeWindowMode(); UpdateCaptionColors(); UpdateEfficiency(); };
+        gamingTimer.Tick += (_, _) => { SynchronizeWindowMode(); UpdateEfficiency(); };
         gamingTimer.Start();
         SynchronizeWindowMode();
+    }
+
+    private void UpdateEfficiency()
+    {
+        if (exiting) return;
+        bool background = !Efficiency.IsWindowVisible(hwnd) || Efficiency.IsIconic(hwnd);
+        Efficiency.Apply(background);
+        // No controller polling is needed while the window is hidden/minimized.
+        if (background) inputTimer.Stop();
+        else if (!inputTimer.IsEnabled) inputTimer.Start();
     }
 
     private void UpdateCaptionColors()

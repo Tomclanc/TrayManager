@@ -100,7 +100,7 @@ internal sealed partial class MainWindow : Window
         Grid.SetRow(footer, 3); root.Children.Add(footer);
         Content = root;
         SetupInteraction(root, heading);
-        AppWindow.Closing += (_, e) => { if (!exiting) { e.Cancel = true; AppWindow.Hide(); } };
+        AppWindow.Closing += (_, e) => { if (!exiting) { e.Cancel = true; AppWindow.Hide(); UpdateEfficiency(); } };
         SetOwnTray();
         signalWait = ThreadPool.RegisterWaitForSingleObject(Program.ShowSignal!, (_, _) => DispatcherQueue.TryEnqueue(ShowSettings), null, -1, false);
         timer.Tick += async (_, _) => await Refresh(false);
@@ -282,6 +282,7 @@ internal sealed partial class MainWindow : Window
 
     private void Quit()
     {
+        Efficiency.Apply(false);
         // Keep desired rules for the next launch, but restore icons for the rest of this session.
         foreach (var entry in changed.Values) Native.Hide(entry, false);
         exiting = true; timer.Stop(); signalWait?.Unregister(null);
@@ -297,7 +298,7 @@ internal sealed partial class MainWindow : Window
         var data = OwnData(); Native.Shell_NotifyIconW(2, ref data);
         if (!preferences.HideOwnIcon) Native.Shell_NotifyIconW(0, ref data);
     }
-    private void ShowSettings() { Native.ShowWindow(hwnd, 9); Activate(); Native.SetForegroundWindow(hwnd); }
+    private void ShowSettings() { Efficiency.Apply(false); Native.ShowWindow(hwnd, 9); Activate(); Native.SetForegroundWindow(hwnd); UpdateEfficiency(); }
     private nint OnMessage(nint h, uint message, nuint w, nint l, nuint id, nuint data)
     {
         if (message == TrayMessage && ((long)l & 0xffff) == 0x203) ShowSettings();
