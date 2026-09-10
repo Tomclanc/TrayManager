@@ -9,7 +9,7 @@
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Nullable>enable</Nullable>
-    <Version>1.0.2</Version>
+    <Version>1.1.7</Version>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon Condition="Exists('TrayManager.ico')">TrayManager.ico</ApplicationIcon>
@@ -22,4 +22,11 @@
     <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup><Content Include="TrayManager.ico" Condition="Exists('TrayManager.ico')" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <Target Name="PublishWinUIResources" AfterTargets="Publish">
+    <ItemGroup>
+      <WinUIResource Include="$(TargetDir)App.xbf" />
+      <WinUIResource Include="$(TargetDir)$(AssemblyName).pri" />
+    </ItemGroup>
+    <Copy SourceFiles="@(WinUIResource)" DestinationFolder="$(PublishDir)" />
+  </Target>
 </Project>

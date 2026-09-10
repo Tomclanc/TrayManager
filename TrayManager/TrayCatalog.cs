@@ -34,9 +34,7 @@ internal static class TrayCatalog
             using var item = root.OpenSubKey(key);
             if (item?.GetValue("ExecutablePath") is not string raw) continue;
             var path = Native.ExpandPath(raw);
-            var name = item.GetValue("InitialTooltip") as string;
-            if (string.IsNullOrWhiteSpace(name)) name = System.IO.Path.GetFileNameWithoutExtension(path);
-            name = name.Replace('\r', ' ').Replace('\n', ' ');
+            var name = AppNames.Resolve(path, item.GetValue("InitialTooltip") as string);
             var snapshot = item.GetValue("IconSnapshot") as byte[];
             if (Guid.TryParse(item.GetValue("IconGuid")?.ToString(), out var guid) && guid != Guid.Empty)
             {

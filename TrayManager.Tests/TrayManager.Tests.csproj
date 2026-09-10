@@ -4,5 +4,9 @@
     <Compile Include="../TrayManager/Native.cs" Link="Native.cs"/>
     <Compile Include="../TrayManager/TrayCatalog.cs" Link="TrayCatalog.cs"/>
     <Compile Include="../TrayManager/Preferences.cs" Link="Preferences.cs"/>
+    <Compile Include="../TrayManager/Hotkey.cs" Link="Hotkey.cs"/>
+    <Compile Include="../TrayManager/AppNames.cs" Link="AppNames.cs"/>
+    <Compile Include="../TrayManager/GamingExperience.cs" Link="GamingExperience.cs"/>
+    <Compile Include="../TrayManager/LayoutMetrics.cs" Link="LayoutMetrics.cs"/>
   </ItemGroup>
 </Project>

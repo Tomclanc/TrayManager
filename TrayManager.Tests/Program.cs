@@ -8,12 +8,27 @@ internal static class Tests
     private static void Check(bool result, string name) { if (!result) throw new Exception("FAIL " + name); Console.WriteLine("PASS " + name); }
     private static void Main()
     {
+        Check(LayoutMetrics.For(true, 1920 / 2, 1080 / 2).FontScale == 1, "1080p 200% no extra font zoom");
+        Check(LayoutMetrics.For(true, 1920 / 2, 1080 / 2).Compact, "1080p 200% compact layout");
+        Check(LayoutMetrics.For(true, 2880 / 2, 1800 / 2).FontScale == 1.15, "spacious 200% bounded enlargement");
+        Check(LayoutMetrics.For(false, 1920, 1080).FontScale == 1, "desktop uses native DIP sizing");
         Check(Marshal.SizeOf<Native.Data>() == 976, "NOTIFYICONDATA x64 layout");
         Check(Marshal.SizeOf<Native.Identifier>() == 40, "NOTIFYICONIDENTIFIER x64 layout");
         Check(string.Equals(Native.ProcessPath((uint)Environment.ProcessId), Environment.ProcessPath, StringComparison.OrdinalIgnoreCase), "limited-access process identity");
         Check(Native.ExpandPath("{6D809377-6AF0-444B-8957-A3773F02200E}\\test").EndsWith("Program Files\\test", StringComparison.OrdinalIgnoreCase), "known-folder expansion");
         var window = CreateWindowEx(0, "STATIC", "TrayManager test fixture", 0, 0, 0, 1, 1, 0, 0, 0, 0);
         Check(window != 0, "test fixture window");
+        Check(Hotkey.Valid(3, 0x54), "Ctrl Alt T accepted");
+        Check(!Hotkey.Valid(0, 0x54), "bare key rejected");
+        Check(!Hotkey.Valid(8, 0x54), "Windows modifier excluded");
+        Check(!Hotkey.Valid(3, 0x7B), "reserved F12 excluded");
+        Check(Hotkey.Label(3, 0x54) == "Ctrl + Alt + T", "hotkey label");
+        uint testKey = Enumerable.Range(0x70, 11).Select(x => (uint)x).FirstOrDefault(k => Native.RegisterHotKey(window, 901, 7 | 0x4000, k));
+        Check(testKey != 0, "register unused test hotkey");
+        try { Check(!Native.RegisterHotKey(window, 902, 7 | 0x4000, testKey), "hotkey conflict detected"); }
+        finally { Native.UnregisterHotKey(window, 901); Native.UnregisterHotKey(window, 902); }
+        Check(Native.RegisterHotKey(window, 903, 7 | 0x4000, testKey), "hotkey released and reusable");
+        Native.UnregisterHotKey(window, 903);
         var data = new Native.Data { cbSize = (uint)Marshal.SizeOf<Native.Data>(), hWnd = window, uID = 27182, uFlags = 2 | 4,
             hIcon = Native.LoadIcon(0, 32512), szTip = "TrayManager temporary self-test" };
         try
@@ -35,6 +50,7 @@ internal static class Tests
         }
         finally { Native.Shell_NotifyIconW(2, ref data); DestroyWindow(window); }
         var live = TrayCatalog.Read();
+        Console.WriteLine("Windows Xbox FSE active: " + GamingExperience.IsActive());
         Console.WriteLine("Live Awake icons: " + live.Count(e => e.Path.EndsWith("PowerToys.Awake.exe", StringComparison.OrdinalIgnoreCase)));
         Console.WriteLine("All tests passed; no user application icons changed.");
     }

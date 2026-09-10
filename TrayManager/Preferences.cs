@@ -6,6 +6,9 @@ internal sealed class Preferences
 {
     public HashSet<string> Hidden { get; set; } = [];
     public bool HideOwnIcon { get; set; }
+    public uint HotkeyModifiers { get; set; }
+    public uint HotkeyKey { get; set; }
+    public bool HotkeyOpensLarge { get; set; }
     public Dictionary<string, SavedIdentity> Identities { get; set; } = [];
     internal static string DirectoryPath => System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Tomclanc", "TrayManager");
     internal static string FilePath => System.IO.Path.Combine(DirectoryPath, "settings.json");

@@ -31,6 +31,15 @@ internal static class Native
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] internal static extern nint LoadImage(nint instance, string name, uint type, int cx, int cy, uint flags);
     [DllImport("user32.dll")] internal static extern bool DestroyIcon(nint icon);
     [DllImport("user32.dll")] internal static extern uint GetDpiForWindow(nint hwnd);
+    [DllImport("user32.dll", SetLastError = true)] internal static extern bool RegisterHotKey(nint hwnd, int id, uint modifiers, uint key);
+    [DllImport("user32.dll")] internal static extern bool UnregisterHotKey(nint hwnd, int id);
+    [DllImport("user32.dll")] internal static extern nint GetForegroundWindow();
+    [StructLayout(LayoutKind.Sequential)] internal struct GamepadState
+    {
+        public uint Packet; public ushort Buttons; public byte LeftTrigger, RightTrigger;
+        public short LeftX, LeftY, RightX, RightY;
+    }
+    [DllImport("xinput1_4.dll")] internal static extern uint XInputGetState(uint index, out GamepadState state);
     [DllImport("kernel32.dll")] private static extern nint OpenProcess(uint access, bool inherit, uint pid);
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] private static extern bool QueryFullProcessImageName(nint process, uint flags, System.Text.StringBuilder path, ref uint size);
     [DllImport("kernel32.dll")] private static extern bool CloseHandle(nint handle);

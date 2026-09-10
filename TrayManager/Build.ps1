@@ -1,4 +1,4 @@
-param([string]$Output = (Join-Path $PSScriptRoot '..\outputs\TrayManager-1.0.2'))
+param([string]$Output = (Join-Path $PSScriptRoot '..\outputs\TrayManager-1.1.7'))
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 $bitmap = [Drawing.Bitmap]::new(64,64)
