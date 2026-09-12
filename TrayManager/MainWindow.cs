@@ -68,6 +68,25 @@ internal sealed partial class MainWindow : Window
         };
         ownCard = Card("隐藏本程序的托盘图标", "双击托盘图标打开；隐藏后，再次启动程序即可打开此窗口。", own);
         settings.Children.Add(ownCard);
+        var startup = new ToggleSwitch { OnContent = "开", OffContent = "关", VerticalAlignment = VerticalAlignment.Center };
+        try { startup.IsOn = StartupRegistration.IsEnabled(); }
+        catch { startup.IsEnabled = false; }
+        bool resettingStartup = false;
+        startup.Toggled += (_, _) =>
+        {
+            if (resettingStartup) return;
+            try
+            {
+                StartupRegistration.SetEnabled(startup.IsOn);
+                status.Text = startup.IsOn ? "已开启：登录 Windows 后在后台启动，不弹出窗口。" : "已关闭开机自启动。";
+            }
+            catch (Exception e)
+            {
+                resettingStartup = true; startup.IsOn = !startup.IsOn; resettingStartup = false;
+                status.Text = "无法修改开机自启动：" + e.Message;
+            }
+        };
+        settings.Children.Add(Card("开机自启动", "登录 Windows 后在后台运行，不自动打开窗口。", startup, appRow: true));
         var toolbar = new Grid { ColumnSpacing = 12 };
         toolbar.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         toolbar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -298,6 +317,7 @@ internal sealed partial class MainWindow : Window
         var data = OwnData(); Native.Shell_NotifyIconW(2, ref data);
         if (!preferences.HideOwnIcon) Native.Shell_NotifyIconW(0, ref data);
     }
+    internal void StartHidden() { AppWindow.Hide(); UpdateEfficiency(); }
     private void ShowSettings() { Efficiency.Apply(false); Native.ShowWindow(hwnd, 9); Activate(); Native.SetForegroundWindow(hwnd); UpdateEfficiency(); }
     private nint OnMessage(nint h, uint message, nuint w, nint l, nuint id, nuint data)
     {

@@ -9,5 +9,6 @@
     <Compile Include="../TrayManager/GamingExperience.cs" Link="GamingExperience.cs"/>
     <Compile Include="../TrayManager/LayoutMetrics.cs" Link="LayoutMetrics.cs"/>
     <Compile Include="../TrayManager/Efficiency.cs" Link="Efficiency.cs"/>
+    <Compile Include="../TrayManager/StartupRegistration.cs" Link="StartupRegistration.cs"/>
   </ItemGroup>
 </Project>

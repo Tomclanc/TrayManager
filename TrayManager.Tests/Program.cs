@@ -8,6 +8,17 @@ internal static class Tests
     private static void Check(bool result, string name) { if (!result) throw new Exception("FAIL " + name); Console.WriteLine("PASS " + name); }
     private static void Main()
     {
+        var startupTestKey = @"Software\Tomclanc\TrayManager.Tests\" + Guid.NewGuid().ToString("N");
+        try
+        {
+            Check(!StartupRegistration.IsEnabled(startupTestKey), "startup absent by default");
+            StartupRegistration.SetEnabled(true, startupTestKey);
+            Check(StartupRegistration.IsEnabled(startupTestKey), "startup registration in isolated key");
+            StartupRegistration.SetEnabled(false, startupTestKey);
+            Check(!StartupRegistration.IsEnabled(startupTestKey), "startup unregister");
+            Check(StartupRegistration.Command(@"C:\Program Files\TrayManager.exe") == "\"C:\\Program Files\\TrayManager.exe\" --background", "startup path quoted with background argument");
+        }
+        finally { Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(startupTestKey, false); }
         var priority = Efficiency.GetPriorityClass(Efficiency.GetCurrentProcess());
         try
         {

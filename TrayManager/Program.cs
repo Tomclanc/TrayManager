@@ -7,9 +7,11 @@ namespace TrayManager;
 internal static class Program
 {
     internal static EventWaitHandle? ShowSignal;
+    internal static bool BackgroundLaunch;
     [STAThread]
     private static void Main(string[] args)
     {
+        BackgroundLaunch = args.Contains("--background");
         if (args.Contains("--scan"))
         {
             System.IO.Directory.CreateDirectory(Preferences.DirectoryPath);
@@ -20,7 +22,7 @@ internal static class Program
         var suffix = WindowsIdentity.GetCurrent().User!.Value;
         using var mutex = new Mutex(true, @"Local\Tomclanc.TrayManager." + suffix, out var first);
         ShowSignal = new EventWaitHandle(false, EventResetMode.AutoReset, @"Local\Tomclanc.TrayManager.Show." + suffix);
-        if (!first) { ShowSignal.Set(); return; }
+        if (!first) { if (!BackgroundLaunch) ShowSignal.Set(); return; }
         try
         {
             WinRT.ComWrappersSupport.InitializeComWrappers();
@@ -52,5 +54,10 @@ public sealed partial class TrayApplication : Application
         };
         InitializeComponent();
     }
-    protected override void OnLaunched(LaunchActivatedEventArgs args) { window = new MainWindow(); window.Activate(); }
+    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    {
+        window = new MainWindow();
+        if (Program.BackgroundLaunch) window.StartHidden();
+        else window.Activate();
+    }
 }
